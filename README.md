@@ -6,7 +6,7 @@
 [![Internship](https://img.shields.io/badge/CodeAlpha-AI%20Internship%20Project-6366f1)](https://codealpha.tech/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-A state-of-the-art, neural-powered web application for real-time multilingual text translation, speech recognition, and audio synthesis. Developed as a capstone internship project for the **CodeAlpha Artificial Intelligence Internship**.
+A state-of-the-art, neural-powered web application for real-time multilingual text translation, speech recognition, and audio synthesis. Developed as a capstone internship project for the **CodeAlpha Artificial Intelligence Internship**...
 
 ---
 
