@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI Language Translator - Neural multi-language translation web application built for CodeAlpha Artificial Intelligence Internship. Features auto-detection, voice input, text-to-speech, and translation history.">
+  <meta name="keywords" content="AI Language Translator, CodeAlpha, Machine Translation, NLP, Flask, Speech to Text, Text to Speech">
+  <meta name="author" content="CodeAlpha AI Intern">
+
+  <title>AI Language Translator | CodeAlpha Artificial Intelligence Internship</title>
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
+</head>
+<body>
+
+  <!-- Background Ambient Glow Accents -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Main Application Container -->
+  <div class="app-container">
+
+    <!-- Top Navigation & Brand Header -->
+    <header class="navbar" role="banner">
+      <a href="/" class="brand" aria-label="AI Language Translator Home">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="AI Translator Logo" class="brand-logo" width="42" height="42">
+        <div class="brand-text">
+          <h1>AI Language Translator</h1>
+          <div class="brand-tag">
+            <span class="internship-badge">CodeAlpha AI Internship</span>
+            <span>• Neural Engine</span>
+          </div>
+        </div>
+      </a>
+
+      <nav class="nav-actions" aria-label="Quick Actions">
+        <div class="badge-pill" title="Translation API is active and ready">
+          <span class="pulse-dot"></span>
+          <span>Engine Online</span>
+        </div>
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark and Light Mode" title="Toggle Theme">
+          <i class="fas fa-sun"></i>
+        </button>
+      </nav>
+    </header>
+
+    <!-- Language Selector & Swap Control Bar -->
+    <section class="controls-bar" aria-label="Language Selection Controls">
+      <!-- Source Language Selector -->
+      <div class="lang-select-group">
+        <label for="source-lang" class="lang-select-label">From:</label>
+        <div class="select-wrapper">
+          <select id="source-lang" class="custom-select" aria-label="Source Language">
+            <option value="auto" data-speech="en-US" selected>🌐 Auto Detect</option>
+            {% for category, group in grouped_languages.items() %}
+            <optgroup label="{{ category }}">
+              {% for lang in group %}
+              <option value="{{ lang.code }}" data-speech="{{ lang.speech_code }}">
+                {{ lang.flag }} {{ lang.name }} ({{ lang.native }})
+              </option>
+              {% endfor %}
+            </optgroup>
+            {% endfor %}
+          </select>
+          <i class="fas fa-chevron-down select-arrow" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <!-- Swap Languages Button -->
+      <div class="swap-btn-container">
+        <button id="swap-btn" class="btn-swap" aria-label="Swap source and target languages" title="Swap Languages (Alt + S)">
+          <i class="fas fa-right-left"></i>
+        </button>
+      </div>
+
+      <!-- Target Language Selector -->
+      <div class="lang-select-group">
+        <label for="target-lang" class="lang-select-label">To:</label>
+        <div class="select-wrapper">
+          <select id="target-lang" class="custom-select" aria-label="Target Language">
+            {% for category, group in grouped_languages.items() %}
+            <optgroup label="{{ category }}">
+              {% for lang in group %}
+              <option value="{{ lang.code }}" data-speech="{{ lang.speech_code }}" {% if lang.code == 'ta' %}selected{% endif %}>
+                {{ lang.flag }} {{ lang.name }} ({{ lang.native }})
+              </option>
+              {% endfor %}
+            </optgroup>
+            {% endfor %}
+          </select>
+          <i class="fas fa-chevron-down select-arrow" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <!-- Optional Provider Selector -->
+      <div class="lang-select-group" style="flex: 0 1 200px;">
+        <label for="provider-select" class="lang-select-label">Engine:</label>
+        <div class="select-wrapper">
+          <select id="provider-select" class="custom-select" aria-label="Translation Provider">
+            <option value="google" selected>⚡ Google Translate</option>
+            <option value="mymemory">🌐 MyMemory API</option>
+            <option value="gemini">✨ Gemini AI</option>
+          </select>
+          <i class="fas fa-chevron-down select-arrow" aria-hidden="true"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Translation Workspace (Cards Grid) -->
+    <main class="translator-workspace" role="main">
+
+      <!-- Left Card: Source Text Input -->
+      <section class="translator-card" aria-label="Source Text Input Panel">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-pen card-title-icon" aria-hidden="true"></i>
+            <span>Source Text</span>
+          </div>
+          <div class="card-actions">
+            <button id="voice-btn" class="icon-btn mic-btn" aria-label="Voice Input (Speech-to-Text)" title="Voice Input (Microphone)">
+              <i class="fas fa-microphone"></i>
+            </button>
+            <button id="copy-source-btn" class="icon-btn" aria-label="Copy Source Text" title="Copy Source Text">
+              <i class="fas fa-copy"></i>
+            </button>
+            <button id="clear-btn" class="icon-btn" aria-label="Clear Source Text" title="Clear All (Esc)">
+              <i class="fas fa-rotate-left"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="text-area-wrapper">
+          <!-- Live Speech Recognition Streaming Banner -->
+          <div id="live-speech-box" class="live-speech-box" style="display: none;" aria-live="polite">
+            <div class="live-speech-header">
+              <div class="live-speech-tag">
+                <span class="live-speech-dot"></span>
+                <span id="live-speech-lang-label">
+                  <i class="fas fa-microphone"></i>
+                  <span id="live-speech-lang-text">Listening...</span>
+                </span>
+              </div>
+              <div class="live-speech-actions">
+                <span class="live-speech-hint">Speak clearly • Click mic to complete</span>
+                <button id="cancel-speech-btn" class="icon-btn-sm" type="button" title="Cancel voice recording" aria-label="Cancel recording">
+                  <i class="fas fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+            <div class="live-speech-stream">
+              <span id="live-final-transcript" class="live-final-text"></span>
+              <span id="live-interim-transcript" class="live-interim-text"></span>
+              <span id="live-speech-placeholder" class="live-speech-placeholder">Listening for your voice... speak now</span>
+            </div>
+          </div>
+
+          <textarea
+            id="source-text"
+            class="translation-textarea"
+            placeholder="Type, paste, or speak words to translate here..."
+            maxlength="5000"
+            spellcheck="true"
+            aria-label="Enter text to translate"
+            autofocus></textarea>
+        </div>
+
+        <div class="card-footer">
+          <div class="metrics-info">
+            <div class="metric-item">
+              <span>Chars:</span>
+              <span id="source-char-count" class="metric-val">0</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">/ 5,000</span>
+            </div>
+            <div class="metric-item">
+              <span>Words:</span>
+              <span id="source-word-count" class="metric-val">0</span>
+            </div>
+            <div id="voice-status" class="voice-status" aria-live="polite">
+              <i class="fas fa-circle-dot"></i>
+              <span id="voice-status-text">Listening... Speak now</span>
+            </div>
+          </div>
+
+          <div class="footer-actions">
+            <button id="translate-btn" class="btn-primary" aria-label="Translate Text">
+              <i class="fas fa-language"></i>
+              <span>Translate</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Card: Translation Output -->
+      <section class="translator-card" aria-label="Translated Result Panel">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-sparkles card-title-icon" aria-hidden="true"></i>
+            <span>Translated Result</span>
+          </div>
+          <div class="card-actions">
+            <button id="tts-btn" class="icon-btn tts-btn" aria-label="Listen to Translation (Text-to-Speech)" title="Listen to Translation">
+              <i class="fas fa-volume-up"></i>
+            </button>
+            <button id="copy-btn" class="icon-btn" aria-label="Copy Translation" title="Copy Translation (Alt + C)">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="text-area-wrapper">
+          <div id="target-text" class="translation-output placeholder-text" aria-live="polite" aria-label="Translated output">
+            <span class="placeholder-text-inner">Translation will appear here instantly...</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="metrics-info">
+            <div class="metric-item">
+              <span>Chars:</span>
+              <span id="target-char-count" class="metric-val">0</span>
+            </div>
+            <div class="metric-item">
+              <span>Words:</span>
+              <span id="target-word-count" class="metric-val">0</span>
+            </div>
+          </div>
+
+          <div class="footer-actions">
+            <div class="keyboard-shortcut-hint">
+              <span>Shortcut:</span>
+              <kbd class="kbd">Ctrl</kbd> + <kbd class="kbd">Enter</kbd>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Status & Telemetry Dashboard Strip -->
+    <aside class="status-bar" aria-label="Translation Telemetry & Status Bar">
+      <div class="status-pills">
+        <div class="status-pill">
+          <span>Detected:</span>
+          <span id="status-detected" class="status-pill-val">Auto Detect</span>
+        </div>
+        <div class="status-pill">
+          <span>Target:</span>
+          <span id="status-target" class="status-pill-val">🇮🇳 Tamil (ta)</span>
+        </div>
+        <div class="status-pill">
+          <span>Engine:</span>
+          <span id="status-provider" class="status-pill-val">Google Translate (GTX)</span>
+        </div>
+      </div>
+
+      <div class="status-pills">
+        <div class="status-pill">
+          <span id="status-latency" class="status-pill-val">Ready</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Recent Translation History Section -->
+    <section class="history-section" aria-label="Recent Translation History">
+      <div class="history-header">
+        <div class="history-title">
+          <i class="fas fa-clock-rotate-left" style="color: var(--accent-primary);"></i>
+          <span>Recent Translation History</span>
+          <span id="history-count" class="history-title-count">0</span>
+        </div>
+        <button id="clear-history-btn" class="btn-secondary" aria-label="Clear All History" title="Clear All History">
+          <i class="fas fa-trash-can"></i>
+          <span>Clear History</span>
+        </button>
+      </div>
+
+      <!-- History Items Container (localStorage) -->
+      <div id="history-list" class="history-list">
+        <!-- Dynamically rendered via app.js -->
+      </div>
+    </section>
+
+    <!-- Footer Information -->
+    <footer class="app-footer" role="contentinfo">
+      <p>
+        <strong>AI Language Translator</strong> • Developed for 
+        <span class="footer-highlight">CodeAlpha Artificial Intelligence Internship</span>
+      </p>
+      <p style="font-size: 0.74rem;">
+        Powered by Python Flask • Modular Translation Services • Web Speech API • Vanilla CSS & JS
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- Toast Container for Notifications -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/speech.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
