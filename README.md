@@ -258,6 +258,9 @@ services/
 
 ## 📸 Screenshots & UI Showcase
 
+<img width="1606" height="987" alt="image" src="https://github.com/user-attachments/assets/52d8c3cd-9efb-4744-b380-475f907bb1b7" />
+
+
 <!-- Placeholder for internship presentation and report screenshots -->
 ### Desktop Dashboard (Dark Theme)
 ```
