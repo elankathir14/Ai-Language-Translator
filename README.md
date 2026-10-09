@@ -2,6 +2,7 @@
 
 [![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11-3776AB?logo=python&logoColor=white)](https://python.org)
 [![Framework](https://img.shields.io/badge/Framework-Flask%203.x-black?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![Deploy to Render](https://img.shields.io/badge/Deploy%20to-Render-46E3B7?logo=render&logoColor=white)](https://render.com)
 [![Frontend](https://img.shields.io/badge/Frontend-HTML5%20%7C%20CSS3%20%7C%20Vanilla%20JS-E34F26?logo=html5&logoColor=white)](https://developer.mozilla.org/)
 [![Internship](https://img.shields.io/badge/CodeAlpha-AI%20Internship%20Project-6366f1)](https://codealpha.tech/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -20,6 +21,7 @@ A state-of-the-art, neural-powered web application for real-time multilingual te
 - [Installation Steps](#installation-steps)
 - [Environment Variable Setup](#environment-variable-setup)
 - [How to Run the Project](#how-to-run-the-project)
+- [Deploying on Render](#️-deploying-on-render)
 - [API Configuration & Modular Providers](#api-configuration--modular-providers)
 - [Screenshots & UI Showcase](#screenshots--ui-showcase)
 - [Keyboard Shortcuts](#keyboard-shortcuts)
@@ -189,6 +191,41 @@ http://127.0.0.1:5000
 ```
 
 To stop the server, press <kbd>Ctrl</kbd> + <kbd>C</kbd> in your terminal.
+
+---
+
+## ☁️ Deploying on Render
+
+This repository is pre-configured for instant zero-configuration deployment on [Render](https://render.com) using the included [`render.yaml`](render.yaml) blueprint and [`Procfile`](Procfile).
+
+### Option A: 1-Click Blueprint Deploy (Recommended)
+1. Log in to [Render](https://dashboard.render.com).
+2. Click **New +** in the top navigation bar and select **Blueprint**.
+3. Connect your GitHub repository (`elankathir14/Ai-Language-Translator`).
+4. Render will automatically detect [`render.yaml`](render.yaml) and configure:
+   - **Service Type**: Web Service
+   - **Environment**: Python
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app:app`
+5. Click **Apply**. Render will build and deploy your application with a live public HTTPS URL (e.g., `https://ai-language-translator.onrender.com`).
+
+### Option B: Manual Web Service Setup
+1. On your Render Dashboard, click **New +** → **Web Service**.
+2. Select your repository: `elankathir14/Ai-Language-Translator`.
+3. Configure the settings:
+   - **Name**: `ai-language-translator`
+   - **Region**: Choose the closest region (e.g., Oregon or Frankfurt)
+   - **Branch**: `main`
+   - **Runtime**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app:app`
+   - **Plan**: `Free`
+4. Under **Environment Variables**, add:
+   - `PYTHON_VERSION`: `3.11.9`
+   - `FLASK_ENV`: `production`
+   - `SECRET_KEY`: (Generate or enter any secure random string)
+   - `TRANSLATION_PROVIDER`: `google`
+5. Click **Deploy Web Service**. Render will install dependencies and start your live server.
 
 ---
 

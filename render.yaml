@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: ai-language-translator
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: TRANSLATION_PROVIDER
+        value: google
+      - key: GOOGLE_TRANSLATE_API_KEY
+        sync: false
+      - key: MYMEMORY_API_KEY
+        sync: false
+      - key: MYMEMORY_EMAIL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
